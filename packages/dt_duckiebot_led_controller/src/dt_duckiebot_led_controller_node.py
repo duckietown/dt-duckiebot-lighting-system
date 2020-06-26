@@ -101,8 +101,8 @@ class Controller(DTROS):
         #saturation
         self.prev_LED[0] = self.msg.LEDscale_white
         self.prev_LED[1] = self.msg.LEDscale_yellow
-        if self.msg.LEDscale_white <= 0.2:
-            self.msg.LEDscale_white = 0.2
+        if self.msg.LEDscale_white <= 0.3:
+            self.msg.LEDscale_white = 0.3
         if self.msg.LEDscale_white >= 1:
             self.msg.LEDscale_white = 1
         if self.msg.LEDscale_yellow <= 0.3:
@@ -150,15 +150,13 @@ class Controller(DTROS):
         #if error is large: scale should be 0 and if error is 0 scale should be one:
         self.msg.motorscale = 1.0 - self.msg.motorscale
         
+        
+        #possible change: Duckiebot never stops completely
+        """
         if self.msg.motorscale <= 0.4:
             self.msg.motorscale = 0.4
         """
-        # Duckiebot should drive at scale of 0.2: better visible result and motorscale = 1
-        self.msg.LEDscale_white = 0.3
-        self.msg.LEDscale_yellow = 0.3
-        self.msg.motorscale = 1.0
-        """
-
+        
         self.pub.publish(self.msg)
             
 
