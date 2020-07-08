@@ -59,10 +59,10 @@ class Controller(DTROS):
         
         #neuer publisher
         self.msg = Light_Adjustment()
-        self.pub=rospy.Publisher("Light_Adjustment",Light_Adjustment,queue_size=1)
+        self.pub=rospy.Publisher("~light_adjustment",Light_Adjustment,queue_size=1)
         
         self.msg_motorscale = Float32
-        self.pub_motorscale=rospy.Publisher("~Motorscale",Float32,queue_size=1)
+        self.pub_motorscale=rospy.Publisher("~motorscale",Float32,queue_size=1)
                
 
         #Subscriber
@@ -142,7 +142,7 @@ class Controller(DTROS):
         self.msg_motorscale = self.k_I_motor * self.integral_motor + self.k_p_motor * self.average_motor
 
         #saturation
-        self.prev_motor = self.msg.motorscale
+        self.prev_motor = self.msg_motorscale
         if self.msg_motorscale >=1:
             self.msg_motorscale = 1
         elif self.msg_motorscale <= 0:
