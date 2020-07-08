@@ -52,6 +52,8 @@ class Controller(DTROS):
         self.prev_LED = [0.0]*2
         self.prev_motor = 0.0
         self.i=0.0
+        self.LEDscale_white=0.0
+        self.LEDsclae_yellow=0.0
 
         #mode is only white or both chanel: "white", "both"
         self.mode = "white"
@@ -99,29 +101,32 @@ class Controller(DTROS):
         self.integral_LED[1] = self.integral_LED[1] +  self.average_LED [1] - self.antiwindup_LED[1]
 
         # PI controller
-        self.msg.LEDscale_white = self.k_I_LED * self.integral_LED[0] + self.k_p_LED * self.average_LED[0]
-        self.msg.LEDscale_yellow = self.k_I_LED * self.integral_LED[1] + self.k_p_LED * self.average_LED[1]
+        self.LEDscale_white = self.k_I_LED * self.integral_LED[0] + self.k_p_LED * self.average_LED[0]
+        self.LEDscale_yellow = self.k_I_LED * self.integral_LED[1] + self.k_p_LED * self.average_LED[1]
 
         #saturation
-        self.prev_LED[0] = self.msg.LEDscale_white
-        self.prev_LED[1] = self.msg.LEDscale_yellow
-        if self.msg.LEDscale_white <= 0.3:
-            self.msg.LEDscale_white = 0.3
-        if self.msg.LEDscale_white >= 1:
-            self.msg.LEDscale_white = 1
-        if self.msg.LEDscale_yellow <= 0.3:
-            self.msg.LEDscale_yellow = 0.3
-        if self.msg.LEDscale_yellow >= 1:
-            self.msg.LEDscale_yellow = 1
+        self.prev_LED[0] = self.LEDscale_white
+        self.prev_LED[1] = self.LEDscale_yellow
+        if self.LEDscale_white <= 0.3:
+            self.LEDscale_white = 0.3
+        if self.LEDscale_white >= 1:
+            self.LEDscale_white = 1
+        if self.LEDscale_yellow <= 0.3:
+            self.LEDscale_yellow = 0.3
+        if self.LEDscale_yellow >= 1:
+            self.LEDscale_yellow = 1
         
         #antiwindup
-        self.antiwindup_LED[0] = self.prev_LED[0] - self.msg.LEDscale_white
-        self.antiwindup_LED[1] = self.prev_LED[1] - self.msg.LEDscale_yellow
+        self.antiwindup_LED[0] = self.prev_LED[0] - self.LEDscale_white
+        self.antiwindup_LED[1] = self.prev_LED[1] - self.LEDscale_yellow
 
-        #if mode is white: set message for yellow to the value fo white
+        #The two different modes
         if self.mode == "white":
-            self.msg.LEDscale_yellow = self.msg.LEDscale_white
-        
+            self.msg.Red=self.msg.Green=self.msg.Blue = self.LEDscale_white
+        else:
+            self.msg.Red=self.msg.Green=0.5*self.LEDscale_white+0.5*self.LEDscale_yellow
+            self.msg.Blue = self.LEDscale_white
+
 
         #Controller for wheels driver node
 
@@ -168,8 +173,8 @@ class Controller(DTROS):
         self.log("average is")
         self.log (self.average_LED)
         self.log ("error for motorscale %s" %self.average_motor)
-        self.log("message is for white %s" %self.msg.LEDscale_white)
-        self.log("message is for yellow %s" %self.msg.LEDscale_yellow)
+        self.log("message is for white %s" %self.LEDscale_white)
+        self.log("message is for yellow %s" %self.LEDscale_yellow)
         self.log("message for motorscale %s" %self.msg_motorscale)
         self.log("Data ist for white %s " %white)
         self.log("Data ist for yellow %s " %yellow)
