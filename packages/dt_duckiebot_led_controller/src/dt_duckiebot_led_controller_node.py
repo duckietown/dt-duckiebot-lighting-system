@@ -5,6 +5,7 @@ import rospy
 from duckietown import DTROS
 from duckietown_msgs.msg import SegmentList
 from dt_duckiebot_led_controller.msg import Light_Adjustment
+from std_msgs.msg import Float32
 
 class Controller(DTROS):
 
@@ -59,6 +60,9 @@ class Controller(DTROS):
         #neuer publisher
         self.msg = Light_Adjustment()
         self.pub=rospy.Publisher("Light_Adjustment",Light_Adjustment,queue_size=1)
+        
+        self.msg_motorscale = Float32
+        self.pub_motorscale=rospy.Publisher("~Motorscale",Float32,queue_size=1)
                
 
         #Subscriber
@@ -135,20 +139,20 @@ class Controller(DTROS):
         self.integral_motor += self.average_motor - self.antiwindup_motor
 
         #PI controller
-        self.msg.motorscale = self.k_I_motor * self.integral_motor + self.k_p_motor * self.average_motor
+        self.msg_motorscale = self.k_I_motor * self.integral_motor + self.k_p_motor * self.average_motor
 
         #saturation
         self.prev_motor = self.msg.motorscale
-        if self.msg.motorscale >=1:
-            self.msg.motorscale = 1
-        elif self.msg.motorscale <= 0:
-            self.msg.motorscale = 0
+        if self.msg_motorscale >=1:
+            self.msg_motorscale = 1
+        elif self.msg_motorscale <= 0:
+            self.msg_motorscale = 0
 
         #antiwindup
-        self.antiwindup_motor = self.prev_motor - self.msg.motorscale
+        self.antiwindup_motor = self.prev_motor - self.msg_motorscale
 
         #if error is large: scale should be 0 and if error is 0 scale should be one:
-        self.msg.motorscale = 1.0 - self.msg.motorscale
+        self.msg_motorscale = 1.0 - self.msg_motorscale
         
         
         #possible change: Duckiebot never stops completely
@@ -158,6 +162,7 @@ class Controller(DTROS):
         """
         
         self.pub.publish(self.msg)
+        self.pub_motorscale.publish(self.msg_motorscale)
             
 
         self.log("average is")
@@ -165,7 +170,7 @@ class Controller(DTROS):
         self.log ("error for motorscale %s" %self.average_motor)
         self.log("message is for white %s" %self.msg.LEDscale_white)
         self.log("message is for yellow %s" %self.msg.LEDscale_yellow)
-        self.log("message for motorscale %s" %self.msg.motorscale)
+        self.log("message for motorscale %s" %self.msg_motorscale)
         self.log("Data ist for white %s " %white)
         self.log("Data ist for yellow %s " %yellow)
         
