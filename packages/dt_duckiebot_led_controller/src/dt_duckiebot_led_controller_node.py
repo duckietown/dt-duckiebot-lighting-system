@@ -4,7 +4,7 @@ import numpy as np
 import rospy
 from duckietown import DTROS
 from duckietown_msgs.msg import SegmentList
-from dt_duckiebot_led_controller.msg import Light_Adjustment
+from dt_duckiebot_led_controller.srv import *
 from std_msgs.msg import Float32
 
 class Controller(DTROS):
@@ -60,8 +60,8 @@ class Controller(DTROS):
         
         
         #neuer publisher
-        self.msg = Light_Adjustment()
-        self.pub=rospy.Publisher("~light_adjustment",Light_Adjustment,queue_size=1)
+        self.srv = SetCustomLEDColorRequest()
+        self.service = rospy.ServiceProxy("~set_custom_led_color",SetCustomLEDColor)
         
         self.msg_motorscale = Float32
         self.pub_motorscale=rospy.Publisher("~motorscale",Float32,queue_size=1)
@@ -120,14 +120,13 @@ class Controller(DTROS):
         self.antiwindup_LED[0] = self.prev_LED[0] - self.LEDscale_white
         self.antiwindup_LED[1] = self.prev_LED[1] - self.LEDscale_yellow
 
-        #The two different modes
         if self.mode == "white":
-            self.msg.Red=self.msg.Green=self.msg.Blue = self.LEDscale_white
+            self.srv.LED1=self.srv.LED2=self.srv.LED3=self.srv.LED4=self.srv.LED5 = [self.LEDscale_white]*3
         else:
-            self.msg.Red=self.msg.Green=0.5*self.LEDscale_white+0.5*self.LEDscale_yellow
-            self.msg.Blue = self.LEDscale_white
-
-
+            self.srv.LED1=self.srv.LED2=self.srv.LED3=self.srv.LED4=self.srv.LED5 = [0.5*self.LEDscale_white+0.5*self.LEDscale_yellow,0.5*self.LEDscale_white+0.5*self.LEDscale_yellow,self.LEDscale_white]
+        
+        self.service(self.srv)
+        
         #Controller for wheels driver node
 
         #normalized error
@@ -165,8 +164,6 @@ class Controller(DTROS):
         if self.msg.motorscale <= 0.4:
             self.msg.motorscale = 0.4
         """
-        
-        self.pub.publish(self.msg)
         self.pub_motorscale.publish(self.msg_motorscale)
             
 

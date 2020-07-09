@@ -8,16 +8,16 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
 )
 
-## Generate messages in the 'msg' folder
-add_message_files(
+
+## Generate services in the 'srv' folder
+add_service_files(
   FILES
-  Light_Adjustment.msg
+  SetCustomLEDColor.srv
 )
 
 generate_messages(
   DEPENDENCIES
   std_msgs
-  duckietown_msgs
 )
 
 
