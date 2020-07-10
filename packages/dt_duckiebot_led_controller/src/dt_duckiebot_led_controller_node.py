@@ -3,9 +3,9 @@ import time
 import numpy as np
 import rospy
 from duckietown import DTROS
-from duckietown_msgs.msg import SegmentList
-from dt_duckiebot_led_controller.srv import *
-from dt_duckiebot_led_controller.msg import LEDColor
+from duckietown_msgs.msg import SegmentList, LEDColor
+from duckietown_msgs.srv import SetCustomLEDColors, SetCurstomLEDColorsRequest, SetCurstomLEDColorsResponse
+
 from std_msgs.msg import Float32
 
 class Controller(DTROS):
