@@ -5,6 +5,7 @@ import rospy
 from duckietown import DTROS
 from duckietown_msgs.msg import SegmentList
 from dt_duckiebot_led_controller.srv import *
+from dt_duckiebot_led_controller.msg import LEDColor
 from std_msgs.msg import Float32
 
 class Controller(DTROS):
@@ -59,10 +60,12 @@ class Controller(DTROS):
         self.mode = "white"
         
         
-        #neuer publisher
-        self.srv = SetCustomLEDColorRequest()
-        self.service = rospy.ServiceProxy("~set_custom_led_color",SetCustomLEDColor)
+        #Service
+        self.srv = SetCustomLEDColorsRequest()
+        self.service = rospy.ServiceProxy("~set_custom_led_colors",SetCustomLEDColors)
         
+        
+        #Publisher
         self.msg_motorscale = Float32
         self.pub_motorscale=rospy.Publisher("~motorscale",Float32,queue_size=1)
                
@@ -121,11 +124,42 @@ class Controller(DTROS):
         self.antiwindup_LED[1] = self.prev_LED[1] - self.LEDscale_yellow
 
         if self.mode == "white":
-            self.srv.LED1=self.srv.LED2=self.srv.LED3=self.srv.LED4=self.srv.LED5 = [self.LEDscale_white]*3
+            colors_list = []
+            for i in range (5):
+                ledcolor = LEDColor()
+                ledcolor.red = int(self.LEDscale_white*255)
+                ledcolor.green = int(self.LEDscale_white*255)
+                ledcolor.blue = int(self.LEDscale_white*255)
+                ledcolor.intensity = 255
+                colors_list.append(ledcolor)
+                
+            #the first time the list is empty and thus it has to be extended.
+            if self.i == 0:
+                self.srv.leds.colors.extend(colors_list)
+            else:
+                self.srv.leds.colors = colors_list
+            
         else:
-            self.srv.LED1=self.srv.LED2=self.srv.LED3=self.srv.LED4=self.srv.LED5 = [0.5*self.LEDscale_white+0.5*self.LEDscale_yellow,0.5*self.LEDscale_white+0.5*self.LEDscale_yellow,self.LEDscale_white]
+            colors_list = []
+            for i in range (5):
+                ledcolor = LEDColor()
+                ledcolor.red = int((self.LEDscale_white+self.LEDscale_yellow)*255*0.5)
+                ledcolor.green = int((self.LEDscale_white+self.LEDscale_yellow)*255*0.5)
+                ledcolor.blue = int(self.LEDscale_white*255)
+                ledcolor.intensity = 255
+                colors_list.append(ledcolor)
+                
+            #the first time the list is empty and thus it has to be extended.
+            if self.i == 0:
+                self.srv.leds.colors.extend(colors_list)
+            else:
+                self.srv.leds.colors = colors_list
+                
+            self.srv.leds.colors.extend(colors_list)
         
         self.service(self.srv)
+        
+        
         
         #Controller for wheels driver node
 

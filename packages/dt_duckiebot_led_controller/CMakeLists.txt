@@ -12,7 +12,13 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate services in the 'srv' folder
 add_service_files(
   FILES
-  SetCustomLEDColor.srv
+  SetCustomLEDColors.srv
+)
+
+add_message_files(
+  FILES
+  LEDColor.msg
+  LEDColorArray.msg
 )
 
 generate_messages(
